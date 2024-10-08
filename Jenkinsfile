@@ -11,7 +11,7 @@ pipeline {
     agent any
     environment {
         GIT_REPO_URL    = 'https://github.com/Leandro-Sousa-1190800/ddd-forum-odsoft'
-        GIT_REPO_BRANCH = 'master'
+        GIT_REPO_BRANCH = 'main'
     }
     tools {
             nodejs 'NodeJS 22.9.0'
