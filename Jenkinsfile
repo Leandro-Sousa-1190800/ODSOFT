@@ -25,7 +25,7 @@ pipeline {
                 echo('Pulling repo...')
                 git branch: "${GIT_REPO_BRANCH}",
                     url: "${GIT_REPO_URL}"
-                echo('Repository pulled successfully!\nRepository URL: ${GIT_REPO_URL}\nRepository Branch: ${GIT_REPO_BRANCH}')
+                echo("Repository pulled successfully!\nRepository URL: ${GIT_REPO_URL}\nRepository Branch: ${GIT_REPO_BRANCH}")
             }
         }
         stage('Build'){
