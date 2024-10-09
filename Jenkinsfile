@@ -63,7 +63,6 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying....'
-                xCommand('mvn deploy')
             }
         }
     }
