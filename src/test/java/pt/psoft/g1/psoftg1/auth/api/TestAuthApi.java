@@ -1,4 +1,4 @@
-/*
+
 package pt.psoft.g1.psoftg1.auth.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,11 +21,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-*/
+
 /**
  * Based on https://github.com/Yoh0xFF/java-spring-security-example
  *
- *//*
+ */
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -45,6 +45,11 @@ class TestAuthApi {
         this.userTestDataFactory = userTestDataFactory;
     }
 
+    @Test
+    void shouldCreateMockMvc(){
+        assertNotNull(mockMvc);
+    }
+/*
     @Test
     void testLoginSuccess() throws Exception {
         final UserView userView = userTestDataFactory
@@ -100,5 +105,5 @@ class TestAuthApi {
                         .content(JsonHelper.toJson(objectMapper, badRequest)))
                 .andExpect(status().isBadRequest()).andExpect(content().string(containsString("must not be blank")));
     }
-
-}*/
+*/
+}

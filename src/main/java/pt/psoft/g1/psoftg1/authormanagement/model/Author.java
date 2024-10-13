@@ -2,6 +2,7 @@ package pt.psoft.g1.psoftg1.authormanagement.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.StaleObjectStateException;
 import pt.psoft.g1.psoftg1.authormanagement.services.UpdateAuthorRequest;
 import pt.psoft.g1.psoftg1.exceptions.ConflictException;
@@ -14,6 +15,7 @@ public class Author extends EntityWithPhoto {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "AUTHOR_NUMBER")
     @Getter
+    @Setter
     private Long authorNumber;
 
     @Version
