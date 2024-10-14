@@ -134,7 +134,6 @@ public class AuthorController {
              @Parameter(description = "The number of the Author to find")
              final Long authorNumber) {
 
-        //Checking if author exists with this id
         authorService.findByAuthorNumber(authorNumber)
                 .orElseThrow(() -> new NotFoundException(Author.class, authorNumber));
 
