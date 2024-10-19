@@ -5,8 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -27,16 +29,14 @@ import java.time.Instant;
 import java.util.*;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 /**
  * Based on https://www.baeldung.com/spring-boot-testing
  * <p>Adaptations to Junit 5 with ChatGPT
  */
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 //@WebMvcTest(AuthorController.class)
 @AutoConfigureMockMvc
 @SpringBootTest
