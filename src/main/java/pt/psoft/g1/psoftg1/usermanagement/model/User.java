@@ -68,23 +68,27 @@ public class User implements UserDetails {
 	@CreatedDate
 	@Column(nullable = false, updatable = false)
 	@Getter
+	@Setter
 	private LocalDateTime createdAt;
 
 	// auditing info
 	@LastModifiedDate
 	@Column(nullable = false)
 	@Getter
+	@Setter
 	private LocalDateTime modifiedAt;
 
 	// auditing info
 	@CreatedBy
 	@Column(nullable = false, updatable = false)
 	@Getter
+	@Setter
 	private String createdBy;
 
 	// auditing info
 	@LastModifiedBy
 	@Column(nullable = false)
+	@Setter
 	private String modifiedBy;
 
 	@Setter
