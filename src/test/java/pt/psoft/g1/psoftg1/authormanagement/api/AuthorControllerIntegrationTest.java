@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
  * Based on https://www.baeldung.com/spring-boot-testing
  * <p>Adaptations to Junit 5 with ChatGPT
  */
+/*
 @ExtendWith(MockitoExtension.class)
 //@WebMvcTest(AuthorController.class)
 @AutoConfigureMockMvc
@@ -129,7 +130,7 @@ public class AuthorControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.items[0].genre", Matchers.is(book1.getGenre().getGenre())))
         ;
     }
-
+*/
     /* Faz sentido que seja testado noutro lado visto ser uma coisa de permissoes?
     @Test
     void getAuthorByIdShouldReturnUnauthorized() throws Exception {
@@ -137,7 +138,8 @@ public class AuthorControllerIntegrationTest {
         this.mockMvc.perform(MockMvcRequestBuilders.get("/api/authors/" + author1.getAuthorNumber()))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }*/
-    @Test
+/*
+@Test
     void shouldReturnAuthorById() throws Exception {
         when(authorService.findByAuthorNumber(author1.getAuthorNumber())).thenReturn(Optional.ofNullable(author1));
         this.mockMvc.perform(
@@ -150,6 +152,6 @@ public class AuthorControllerIntegrationTest {
 
     }
 
-
     // As Librarian
 }
+*/

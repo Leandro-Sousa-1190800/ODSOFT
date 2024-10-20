@@ -18,7 +18,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import pt.psoft.g1.psoftg1.authormanagement.api.AuthorLendingView;
 import pt.psoft.g1.psoftg1.authormanagement.model.Author;
 import pt.psoft.g1.psoftg1.authormanagement.repositories.AuthorRepository;
+import pt.psoft.g1.psoftg1.bookmanagement.model.Book;
+import pt.psoft.g1.psoftg1.bookmanagement.repositories.BookRepository;
 import pt.psoft.g1.psoftg1.exceptions.NotFoundException;
+import pt.psoft.g1.psoftg1.genremanagement.model.Genre;
+import pt.psoft.g1.psoftg1.shared.repositories.PhotoRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,13 +42,18 @@ public class AuthorServiceImplIntegrationTest {
     private AuthorService authorService;
     @MockBean
     private AuthorRepository authorRepository;
+    @MockBean
+    private BookRepository bookRepository;
+    @MockBean
+    private PhotoRepository photoRepository;
 
-    private Author alex, charles;
+    private Author alex, charles, patricia;
 
     @BeforeEach
     public void setUp() {
         this.alex = new Author("Alex", "O Alex escreveu livros", null);
-        this.charles = new Author("Charles", "O Charles escreveu livros", null);
+        this.charles = new Author("Charles", "O Charles escreveu livros", "charles.png");
+        this.patricia = new Author("Patricia", "Sou a Patricia", null);
 
         when(authorRepository.findByAuthorNumber(0L))
                 .thenReturn(Optional.empty());
@@ -54,6 +63,9 @@ public class AuthorServiceImplIntegrationTest {
 
         when(authorRepository.findByAuthorNumber(2L))
                 .thenReturn(Optional.of(charles));
+
+        when(authorRepository.findByAuthorNumber(3L))
+                .thenReturn(Optional.of(patricia));
     }
 
     @Test
@@ -91,7 +103,7 @@ public class AuthorServiceImplIntegrationTest {
     }
     @Test
     public void whenInvalidId_thenAuthorShouldBeNotFound() {
-        Long id = 2L;
+        Long id = 10L;
         Optional<Author> found = authorService.findByAuthorNumber(id);
         Assertions.assertEquals(Optional.empty(),found);
     }
@@ -192,4 +204,88 @@ public class AuthorServiceImplIntegrationTest {
         Assertions.assertEquals(a4,authorService.findTopAuthorByLendings().get(3));
         Assertions.assertEquals(a5,authorService.findTopAuthorByLendings().get(4));
     }
+
+    @Test
+    public void whenValidAuthorNumber_thenAuthorBooksShouldBeFound() {
+        Long id = 1L;
+        ArrayList<Author> b1_Authors = new ArrayList<>();
+        b1_Authors.add(alex);
+
+        Book b1 = new Book("9789720706386","Book 1", "Test book 1", new Genre("Thriller"), b1_Authors,"");
+
+        ArrayList<Book> books = new ArrayList<>();
+        books.add(b1);
+
+        when(bookRepository.findBooksByAuthorNumber(1L)).thenReturn(books);
+
+        List<Book> found = authorService.findBooksByAuthorNumber(id);
+
+        Assertions.assertNotNull(found);
+        Assertions.assertEquals(1,found.size());
+    }
+    @Test
+    public void whenInvalidAuthorNumber_thenAuthorBooksShouldBeNotFound() {
+        Long id = 10L;
+        when(bookRepository.findBooksByAuthorNumber(1L)).thenReturn(new ArrayList<Book>());
+
+        List<Book> found = authorService.findBooksByAuthorNumber(id);
+
+        Assertions.assertNotNull(found);
+        Assertions.assertEquals(0,found.size());
+    }
+
+    @Test
+    public void whenValidAuthorNumber_thenCoAuthorsShouldBeFound() {
+        Long id = 1L;
+        ArrayList<Author> coAuthors = new ArrayList<>();
+
+        coAuthors.add(charles);
+        coAuthors.add(patricia);
+
+        when(authorRepository.findCoAuthorsByAuthorNumber(1L)).thenReturn(coAuthors);
+
+        List<Author> found = authorService.findCoAuthorsByAuthorNumber(id);
+
+        Assertions.assertNotNull(found);
+        Assertions.assertEquals(2,found.size());
+    }
+    @Test
+    public void whenValidAuthorNumberButNoCoAuthoredBooks_thenCoAuthorsShouldBeEmpty() {
+        Long id = 1L;
+
+        when(authorRepository.findCoAuthorsByAuthorNumber(1L)).thenReturn(new ArrayList<>());
+
+        List<Author> found = authorService.findCoAuthorsByAuthorNumber(id);
+
+        Assertions.assertNotNull(found);
+        Assertions.assertEquals(0,found.size());
+    }
+
+    @Test
+    public void whenInvalidAuthorNumber_thenShouldThrowNotFoundException() {
+        Long id = 1L;
+
+        when(authorRepository.findByAuthorNumber(1L)).thenThrow(new NotFoundException("Cannot find reader"));
+
+        Assertions.assertThrows(NotFoundException.class,() -> authorService.findByAuthorNumber(1L));
+    }
+
+    @Test
+    public void whenValidAuthorNumberWithEmptyPhoto_thenShouldReturnAuthor() {
+        Long id = 1L;
+
+        when(authorRepository.save(Mockito.any(Author.class))).thenReturn(alex);
+
+        Assertions.assertAll(() -> authorService.removeAuthorPhoto(1L, 0));
+    }
+
+    @Test
+    public void whenValidAuthorNumberWithPhoto_thenShouldReturnUpdatedAuthor() {
+        Long id = 2L;
+
+        when(authorRepository.save(Mockito.any(Author.class))).thenReturn(charles);
+
+        Assertions.assertAll(() -> authorService.removeAuthorPhoto(2L, 0));
+    }
+
 }
