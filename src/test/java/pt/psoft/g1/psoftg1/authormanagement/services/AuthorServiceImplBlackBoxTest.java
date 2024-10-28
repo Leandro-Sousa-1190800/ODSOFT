@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -37,7 +38,7 @@ import static org.mockito.Mockito.when;
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-public class AuthorServiceImplIntegrationTest {
+public class AuthorServiceImplBlackBoxTest {
     @Autowired
     private AuthorService authorService;
     @MockBean
@@ -47,7 +48,7 @@ public class AuthorServiceImplIntegrationTest {
     @MockBean
     private PhotoRepository photoRepository;
 
-    private Author alex, charles, patricia;
+    private Author alex = mock(Author.class), charles = mock(Author.class), patricia = mock(Author.class);
 
     @BeforeEach
     public void setUp() {
@@ -155,9 +156,6 @@ public class AuthorServiceImplIntegrationTest {
         Assertions.assertNotNull(authorService.partialUpdate(1L,updateRequest,0));
     }
 
-    /**
-     * Não tenho a certeza se é relevante ter este teste visto a excepção ser levantada no Author.class
-     */
     @Test
     public void whenPartialUpdateInvalidVersion_thenShouldThrowNotFoundExpecption(){
         UpdateAuthorRequest updateRequest = new UpdateAuthorRequest("Olá, sou o Alex", "Alex",null,"");

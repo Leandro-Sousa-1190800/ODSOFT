@@ -30,13 +30,14 @@ import java.util.*;
 
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * Based on https://www.baeldung.com/spring-boot-testing
  * <p>Adaptations to Junit 5 with ChatGPT
  */
-/*
+
 @ExtendWith(MockitoExtension.class)
 //@WebMvcTest(AuthorController.class)
 @AutoConfigureMockMvc
@@ -44,14 +45,12 @@ import static org.mockito.Mockito.when;
 //@ActiveProfiles("integrationtest")
 public class AuthorControllerIntegrationTest {
 
-    @MockBean
     private AuthorService authorService;
     private final MockMvc mockMvc;
     private JwtEncoder jwtEncoder;
     private User librarian;
     private User reader;
-    @MockBean
-    private Author author1;
+    private Author author1 = mock(Author.class);
     private String librarianToken;
     private String readerToken;
     private Book book1;
@@ -68,8 +67,83 @@ public class AuthorControllerIntegrationTest {
         MockitoAnnotations.openMocks(this);
         librarian = new User("maria@gmail.com","Mariaroberta!123");
         reader = new User("pedro@gmail.com","Pedro!123");
-        author1 = new Author("Robert", "Hello, I'm Robert", "");
-        author1.setAuthorNumber(1L);
+        //author1 = new Author("Robert", "Hello, I'm Robert", "");
+        final Instant now = Instant.now();
+        final long expiry = 36000L; // 1 hours is usually too long for a token to be valid. adjust for production
+
+        final JwtClaimsSet librarianClaims = JwtClaimsSet.builder().issuer("example.io").issuedAt(now)
+                .expiresAt(now.plusSeconds(expiry)).subject(format("%s,%s", librarian.getId(), librarian.getUsername()))
+                .claim("roles", "LIBRARIAN").build();
+
+        final JwtClaimsSet readerClaims = JwtClaimsSet.builder().issuer("example.io").issuedAt(now)
+                .expiresAt(now.plusSeconds(expiry)).subject(format("%s,%s", reader.getId(), reader.getUsername()))
+                .claim("roles", "READER").build();
+
+        librarianToken= this.jwtEncoder.encode(JwtEncoderParameters.from(librarianClaims)).getTokenValue();
+        readerToken= this.jwtEncoder.encode(JwtEncoderParameters.from(readerClaims)).getTokenValue();
+
+    }
+
+    @Test
+    void shouldCreateMockMvc(){
+        assertNotNull(mockMvc);
+    }
+
+    // As Reader
+
+    @Test
+    void FindBooksByAuthorNumber() throws Exception {
+        this.mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/authors/3/books")
+                                .header("Authorization", "Bearer " + readerToken))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items", Matchers.not(Matchers.emptyArray())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items", Matchers.hasSize(1)));
+    }
+
+    @Test
+    void GetAuthorById_AuthorDoesntExist() throws Exception {
+        this.mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/authors/30")
+                                .header("Authorization", "Bearer " + readerToken))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    void GetAuthorById() throws Exception {
+        this.mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/authors/3")
+                                .header("Authorization", "Bearer " + readerToken))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.authorNumber",Matchers.is(3)));
+    }
+
+    /*
+    @MockBean
+    private AuthorService authorService;
+    private final MockMvc mockMvc;
+    private JwtEncoder jwtEncoder;
+    private User librarian;
+    private User reader;
+    private Author author1 = mock(Author.class);
+    private String librarianToken;
+    private String readerToken;
+    private Book book1;
+    private List<Book> bookList = new ArrayList<>();
+
+    @Autowired
+    public AuthorControllerIntegrationTest(MockMvc mockMvc, JwtEncoder encoder) {
+        this.mockMvc = mockMvc;
+        this.jwtEncoder = encoder;
+    }
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        librarian = new User("maria@gmail.com","Mariaroberta!123");
+        reader = new User("pedro@gmail.com","Pedro!123");
+        //author1 = new Author("Robert", "Hello, I'm Robert", "");
+        when(author1.getAuthorNumber()).thenReturn(1L);
         final Instant now = Instant.now();
         final long expiry = 36000L; // 1 hours is usually too long for a token to be valid. adjust for production
 
@@ -98,7 +172,7 @@ public class AuthorControllerIntegrationTest {
 
     @Test
     void getBooksByAuthorNumber_AuthorNotFound() throws Exception {
-        when(authorService.findByAuthorNumber(author1.getAuthorNumber())).thenThrow(new NotFoundException(Author.class, author1.getAuthorNumber()));
+        when(authorService.findByAuthorNumber(1L)).thenThrow(new NotFoundException(Author.class, 1L));
         this.mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/authors/" + author1.getAuthorNumber()+"/books")
                         .header("Authorization", "Bearer " + readerToken))
@@ -130,15 +204,15 @@ public class AuthorControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.items[0].genre", Matchers.is(book1.getGenre().getGenre())))
         ;
     }
-*/
-    /* Faz sentido que seja testado noutro lado visto ser uma coisa de permissoes?
+
+
     @Test
     void getAuthorByIdShouldReturnUnauthorized() throws Exception {
         when(authorService.findByAuthorNumber(author1.getAuthorNumber())).thenReturn(Optional.ofNullable(author1));
         this.mockMvc.perform(MockMvcRequestBuilders.get("/api/authors/" + author1.getAuthorNumber()))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
-    }*/
-/*
+    }
+
 @Test
     void shouldReturnAuthorById() throws Exception {
         when(authorService.findByAuthorNumber(author1.getAuthorNumber())).thenReturn(Optional.ofNullable(author1));
@@ -151,7 +225,6 @@ public class AuthorControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name", Matchers.is(author1.getName())));
 
     }
-
+*/
     // As Librarian
 }
-*/
